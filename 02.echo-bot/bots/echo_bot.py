@@ -1,10 +1,13 @@
 from botbuilder.core import ActivityHandler, MessageFactory, TurnContext
 from botbuilder.schema import ChannelAccount
 import random
+from azure.ai.textanalytics import TextAnalyticsClient
+from azure.core.credentials import AzureKeyCredential
 
 class EchoBot(ActivityHandler):
-    def __init__(self):
+    def __init__(self,client):
         self.conversation_state = {}
+        self.client=client
 
     async def on_members_added_activity(
         self, members_added: [ChannelAccount], turn_context: TurnContext
@@ -21,6 +24,8 @@ class EchoBot(ActivityHandler):
             self.conversation_state[user_id] = {"state": "initial"}
 
         state = self.conversation_state[user_id]["state"]
+         # Call Azure Sentiment Analysis
+        sentiment = await self.analyze_sentiment(user_message)
 
         if "hello" in user_message or "hi" in user_message:
             response = "Hello! How are you doing today?"
@@ -52,3 +57,23 @@ class EchoBot(ActivityHandler):
             response = random.choice(responses)
 
         await turn_context.send_activity(MessageFactory.text(response))
+    
+
+    async def analyze_sentiment(self, text):
+        """Analyze sentiment of the given text using Azure API."""
+        try:
+            print(f"Sending text to Azure API for sentiment analysis: {text}")
+            documents = [text]
+            
+            # Analyze sentiment using Azure API
+            response = self.client.analyze_sentiment(documents=documents)
+            
+            # Since response is a list, access the first item properly
+            sentiment_result = response[0].sentiment
+            
+            print(f"Received response: {sentiment_result}")
+            return sentiment_result
+        
+        except Exception as e:
+            print(f"Error during sentiment analysis: {e}")
+            return "neutral"  # Fallback in case of an error
