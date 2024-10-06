@@ -15,3 +15,9 @@ class DefaultConfig:
     APP_PASSWORD = os.environ.get("MicrosoftAppPassword", "")
     APP_TYPE = os.environ.get("MicrosoftAppType", "MultiTenant")
     APP_TENANTID = os.environ.get("MicrosoftAppTenantId", "")
+# Add Azure Sentiment Analysis API details
+    AZURE_LANGUAGE_KEY = os.environ.get("AZURE_LANGUAGE_KEY", "")
+    AZURE_LANGUAGE_ENDPOINT = os.environ.get("AZURE_LANGUAGE_ENDPOINT", "")
+
+    print(AZURE_LANGUAGE_ENDPOINT)
+    print(AZURE_LANGUAGE_KEY)
