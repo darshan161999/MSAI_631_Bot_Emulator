@@ -18,8 +18,24 @@ from botbuilder.schema import Activity, ActivityTypes
 from bots import EchoBot
 from config import DefaultConfig
 
+from azure.ai.textanalytics import TextAnalyticsClient
+from azure.core.credentials import AzureKeyCredential
+
 CONFIG = DefaultConfig()
 
+def authenticate_client():
+    try:
+        print("Initializing Azure Text Analytics client...")
+        credential = AzureKeyCredential(DefaultConfig.AZURE_LANGUAGE_KEY)
+        text_analytics_client = TextAnalyticsClient(endpoint=DefaultConfig.AZURE_LANGUAGE_ENDPOINT, credential=credential)
+        print(f"Client initialized with endpoint: {DefaultConfig.AZURE_LANGUAGE_ENDPOINT}")
+        return text_analytics_client
+    except Exception as e:
+        print(f"Failed to initialize Azure Text Analytics client: {e}")
+        raise
+
+
+client = authenticate_client()
 # Create adapter.
 # See https://aka.ms/about-bot-adapter to learn more about how bots work.
 ADAPTER = CloudAdapter(ConfigurationBotFrameworkAuthentication(CONFIG))
@@ -56,7 +72,7 @@ async def on_error(context: TurnContext, error: Exception):
 ADAPTER.on_turn_error = on_error
 
 # Create the Bot
-BOT = EchoBot()
+BOT = EchoBot(client)
 
 
 # Listen for incoming requests on /api/messages
